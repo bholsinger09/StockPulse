@@ -2,6 +2,13 @@
 
 Real-time stock price streaming application with WebSocket support, built with React + Vite frontend and Fastify backend.
 
+## 🌐 Live Demo
+
+- **Frontend**: http://stockpulse.duckdns.org:5173
+- **Backend API**: http://stockpulse.duckdns.org:3001
+- **Metrics**: http://stockpulse.duckdns.org:3001/metrics
+- **Health**: http://stockpulse.duckdns.org:3001/health
+
 ## 🚀 Features
 
 - **Real-time Stock Updates**: Simulated stock prices updated every second
@@ -10,6 +17,7 @@ Real-time stock price streaming application with WebSocket support, built with R
 - **Load Testing**: Built-in tools to test WebSocket performance
 - **Modern Stack**: React + Vite for frontend, Fastify for backend
 - **Responsive UI**: Beautiful, mobile-friendly interface
+- **Live Demo**: http://stockpulse.duckdns.org:5173
 
 ## 📋 Architecture
 

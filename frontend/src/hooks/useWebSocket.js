@@ -1,7 +1,12 @@
 // WebSocket hook for managing connection and data
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const WS_URL = 'ws://localhost:3001/ws';
+// Use environment variable or fallback to production/local URLs
+const WS_URL = import.meta.env.VITE_WS_URL || 
+  (window.location.hostname === 'localhost' 
+    ? 'ws://localhost:3001/ws' 
+    : `ws://${window.location.hostname}:3001/ws`);
+    
 const PING_INTERVAL = 5000; // Send ping every 5 seconds
 
 export const useWebSocket = () => {
@@ -10,7 +15,7 @@ export const useWebSocket = () => {
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
   const [latency, setLatency] = useState(0);
   const [error, setError] = useState(null);
-
+  
   const wsRef = useRef(null);
   const pingIntervalRef = useRef(null);
   const reconnectTimeoutRef = useRef(null);
@@ -20,14 +25,14 @@ export const useWebSocket = () => {
     try {
       setConnectionStatus('connecting');
       setError(null);
-
+      
       const ws = new WebSocket(WS_URL);
       wsRef.current = ws;
 
       ws.onopen = () => {
         console.log('WebSocket connected');
         setConnectionStatus('connected');
-
+        
         // Start sending pings
         pingIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
@@ -43,26 +48,26 @@ export const useWebSocket = () => {
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-
+          
           switch (data.type) {
             case 'initial':
               setStocks(data.stocks);
               break;
-
+              
             case 'update':
               setStocks(data.stocks);
               if (data.metrics) {
                 setMetrics(data.metrics);
               }
               break;
-
+              
             case 'pong':
               // Calculate round-trip latency
               const now = Date.now();
               const rtt = now - pingTimestampRef.current;
               setLatency(rtt);
               break;
-
+              
             default:
               console.log('Unknown message type:', data.type);
           }
@@ -80,20 +85,20 @@ export const useWebSocket = () => {
       ws.onclose = () => {
         console.log('WebSocket disconnected');
         setConnectionStatus('disconnected');
-
+        
         // Clear ping interval
         if (pingIntervalRef.current) {
           clearInterval(pingIntervalRef.current);
           pingIntervalRef.current = null;
         }
-
+        
         // Attempt to reconnect after 3 seconds
         reconnectTimeoutRef.current = setTimeout(() => {
           console.log('Attempting to reconnect...');
           connect();
         }, 3000);
       };
-
+      
     } catch (err) {
       console.error('Error creating WebSocket:', err);
       setError('Failed to create connection');
@@ -106,23 +111,23 @@ export const useWebSocket = () => {
       clearInterval(pingIntervalRef.current);
       pingIntervalRef.current = null;
     }
-
+    
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-
+    
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
-
+    
     setConnectionStatus('disconnected');
   }, []);
 
   useEffect(() => {
     connect();
-
+    
     return () => {
       disconnect();
     };
