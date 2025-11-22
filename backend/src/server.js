@@ -26,9 +26,19 @@ await fastify.register(websocket, {
 const simulator = new StockSimulator();
 const metrics = new MetricsTracker();
 
-// Initialize OpenAI (will only work if API key is set)
-const openai = process.env.OPENAI_API_KEY ? new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+// Initialize AI client (supports Groq, xAI Grok, or OpenAI)
+// Priority: GROQ_API_KEY > XAI_API_KEY > OPENAI_API_KEY
+const aiApiKey = process.env.GROQ_API_KEY || process.env.XAI_API_KEY || process.env.OPENAI_API_KEY;
+let baseURL = 'https://api.openai.com/v1';
+if (process.env.GROQ_API_KEY) {
+  baseURL = 'https://api.groq.com/openai/v1';
+} else if (process.env.XAI_API_KEY) {
+  baseURL = 'https://api.x.ai/v1';
+}
+
+const openai = aiApiKey ? new OpenAI({
+  apiKey: aiApiKey,
+  baseURL: baseURL
 }) : null;
 
 // Store connected clients
@@ -74,11 +84,11 @@ fastify.get('/stocks', async (request, reply) => {
   };
 });
 
-// Stock analysis endpoint
+// Stock Analysis API endpoint
 fastify.post('/api/analyze-stocks', async (request, reply) => {
   if (!openai) {
     return reply.code(503).send({
-      error: 'AI analysis service not configured. Please set OPENAI_API_KEY environment variable.'
+      error: 'AI analysis service not configured. Please set GROQ_API_KEY, XAI_API_KEY, or OPENAI_API_KEY environment variable.'
     });
   }
 
@@ -115,8 +125,16 @@ Please provide a comprehensive analysis in JSON format with the following struct
 
 Provide practical, actionable recommendations. Be honest about risks. Focus on helping a retail investor make informed decisions.`;
 
+    // Select model based on which API key is being used
+    let model = "gpt-4o-mini"; // OpenAI default
+    if (process.env.GROQ_API_KEY) {
+      model = "llama-3.3-70b-versatile"; // Groq's latest free model
+    } else if (process.env.XAI_API_KEY) {
+      model = "grok-beta"; // xAI Grok
+    }
+    
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: model,
       messages: [
         {
           role: "system",
@@ -136,9 +154,11 @@ Provide practical, actionable recommendations. Be honest about risks. Focus on h
 
   } catch (error) {
     fastify.log.error('Error analyzing stocks:', error);
+    console.error('Full error details:', error);
     return reply.code(500).send({
       error: 'Failed to analyze stocks',
-      message: error.message
+      message: error.message,
+      details: error.stack
     });
   }
 });

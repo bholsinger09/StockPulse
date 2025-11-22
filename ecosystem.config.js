@@ -5,8 +5,8 @@ module.exports = {
   apps: [
     {
       name: 'stockpulse-backend',
-      script: './backend/src/server.js',
-      cwd: '/home/ubuntu/stockpulse',
+      script: 'start.sh',
+      cwd: '/home/ubuntu/stockpulse/backend',
       instances: 1,
       autorestart: true,
       watch: false,
@@ -16,8 +16,8 @@ module.exports = {
         PORT: 3001,
         HOST: '0.0.0.0'
       },
-      error_file: './logs/backend-error.log',
-      out_file: './logs/backend-out.log',
+      error_file: '../logs/backend-error.log',
+      out_file: '../logs/backend-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true
     },
