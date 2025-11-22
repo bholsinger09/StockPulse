@@ -13,6 +13,7 @@ Real-time stock price streaming application with WebSocket support, built with R
 
 - **Real-time Stock Updates**: Simulated stock prices updated every second
 - **WebSocket API**: Efficient bi-directional communication
+- **AI Stock Shopping Assistant**: Get personalized stock analysis and recommendations powered by OpenAI
 - **Performance Metrics**: Live monitoring of latency, throughput, and connection stats
 - **Load Testing**: Built-in tools to test WebSocket performance
 - **Modern Stack**: React + Vite for frontend, Fastify for backend
@@ -182,6 +183,18 @@ The frontend automatically attempts to reconnect if the WebSocket connection is 
 ## 🔧 Configuration
 
 ### Backend Configuration
+
+**OpenAI API Key (Required for Stock Assistant)**
+
+1. Get your API key from https://platform.openai.com/api-keys
+2. Create `backend/.env` file:
+```bash
+cp backend/.env.example backend/.env
+```
+3. Add your API key:
+```bash
+OPENAI_API_KEY=your_actual_api_key_here
+```
 
 Edit `backend/src/server.js`:
 
