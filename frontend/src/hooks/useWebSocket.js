@@ -2,10 +2,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Use environment variable or fallback to production/local URLs
+// Auto-detect protocol based on page protocol (ws:// for http://, wss:// for https://)
 const WS_URL = import.meta.env.VITE_WS_URL || 
   (window.location.hostname === 'localhost' 
     ? 'ws://localhost:3001/ws' 
-    : `ws://${window.location.hostname}:3001/ws`);
+    : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`);
     
 const PING_INTERVAL = 5000; // Send ping every 5 seconds
 
